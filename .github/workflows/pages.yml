@@ -1,0 +1,124 @@
+name: Publish reports (Pages root = ./reports)
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate reports/index.html
+        run: |
+          set -euo pipefail
+
+          # Ensure reports exists
+          test -d reports
+
+          python3 - << 'PY'
+          import os, html, datetime
+
+          reports_root = "reports"
+          items = []
+          for ticker in sorted(os.listdir(reports_root)):
+            tp = os.path.join(reports_root, ticker)
+            if not os.path.isdir(tp): 
+              continue
+            files = [f for f in sorted(os.listdir(tp)) if f.lower().endswith(".html")]
+            if files:
+              items.append((ticker, files))
+
+          def esc(s): return html.escape(s)
+
+          now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+
+          out = []
+          out.append("<!doctype html><html><head><meta charset='utf-8'/>")
+          out.append("<meta name='viewport' content='width=device-width,initial-scale=1'/>")
+          out.append("<title>HTML Reports</title>")
+          out.append("""
+          <style>
+            body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:1100px;margin:40px auto;padding:0 16px;}
+            h1{margin:0 0 8px;}
+            .meta{color:#666;margin:0 0 18px;}
+            input{width:100%;padding:10px 12px;font-size:14px;border:1px solid #ccc;border-radius:8px;margin:0 0 18px;}
+            .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+            .card{border:1px solid #e5e5e5;border-radius:12px;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+            .card h2{font-size:16px;margin:0 0 10px;}
+            ul{margin:0;padding-left:18px;}
+            a{text-decoration:none;}
+            a:hover{text-decoration:underline;}
+            .small{color:#666;font-size:12px;margin-top:8px;}
+            code{background:#f6f6f6;padding:2px 6px;border-radius:6px;}
+          </style>
+          """)
+          out.append("</head><body>")
+          out.append("<h1>HTML Reports</h1>")
+          out.append(f"<p class='meta'>Generated: {esc(now)} · Root: <code>./reports/</code></p>")
+          out.append("<input id='q' placeholder='Search tickers or report filenames...' />")
+          out.append("<div class='grid' id='grid'>")
+
+          for ticker, files in items:
+            searchable = (ticker + " " + " ".join(files)).lower()
+            out.append(f"<div class='card' data-text='{esc(searchable)}'>")
+            out.append(f"<h2>{esc(ticker)}</h2><ul>")
+            for f in files:
+              # Links are relative to reports/ (Pages root), so no "reports/" prefix
+              href = f"{esc(ticker)}/{esc(f)}"
+              out.append(f"<li><a href='{href}'>{esc(f)}</a></li>")
+            out.append("</ul>")
+            out.append(f"<div class='small'>{len(files)} file(s)</div>")
+            out.append("</div>")
+
+          out.append("</div>")
+          out.append("""
+          <script>
+            const q = document.getElementById('q');
+            const cards = Array.from(document.querySelectorAll('.card'));
+            q.addEventListener('input', () => {
+              const term = q.value.trim().toLowerCase();
+              for (const c of cards) {
+                c.style.display = (!term || c.dataset.text.includes(term)) ? '' : 'none';
+              }
+            });
+          </script>
+          """)
+          out.append("</body></html>")
+
+          with open(os.path.join(reports_root, "index.html"), "w", encoding="utf-8") as fp:
+            fp.write("\n".join(out))
+
+          print(f"Wrote reports/index.html with {len(items)} tickers")
+          PY
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact (reports/)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: reports
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
