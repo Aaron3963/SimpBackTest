@@ -5,6 +5,8 @@ Trading signals are saved and loaded to Backtrader for backtesting, and quantSta
 
 <img width="1738" height="1109" alt="image" src="https://github.com/user-attachments/assets/cae97f3c-6d0c-47d9-9dd4-1334f1c261ff" />
 
+Full report of this image can be found [**here**](https://aaron3963.github.io/SimpBackTest/TSCO/TSCO_LASSO_Momentum3.html) .
+
 
 
 
