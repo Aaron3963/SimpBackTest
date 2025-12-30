@@ -3,7 +3,8 @@ This project is a backtesting pipeline that allows users to test simple algorith
 
 Trading signals are saved and loaded to Backtrader for backtesting, and quantStats is responsible for generating an HTML report that contains all testing metrics and graphs like the one below.
 
-<img width="865" height="479" alt="image" src="https://github.com/user-attachments/assets/a26afd8e-acc0-49cc-be60-f1f950ffa027" />
+<img width="1738" height="1109" alt="image" src="https://github.com/user-attachments/assets/cae97f3c-6d0c-47d9-9dd4-1334f1c261ff" />
+
 
 ## Environment Setup
 This project used Python 3.12, with the following packages installed:
