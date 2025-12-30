@@ -1,9 +1,11 @@
 # SimpBackTest
 This project is a backtesting pipeline that allows users to test simple algorithmic trading strategies with ease. It contains all necessary steps for backtesting, including data fetching, feature generation, model selection, signal creation, and report generation. The project is highly modularized and compatible with sklearn and pandas, so users can modify or import strategies without overhead.
 
-Trading signals are saved and loaded to Backtrader for backtesting, and quantStats is responsible for generating an HTML report that contains all testing metrics and graphs like the one below.
+Trading signals are saved and loaded to Backtrader for backtesting, and quantStats is responsible for generating an HTML report that contains all testing metrics and graphs like the one below. There is also an automated Action workflow that generates a [**static webpage**](https://aaron3963.github.io/SimpBackTest/) which contains all the reports generated.
 
 <img width="1738" height="1109" alt="image" src="https://github.com/user-attachments/assets/cae97f3c-6d0c-47d9-9dd4-1334f1c261ff" />
+
+
 
 
 ## Environment Setup
