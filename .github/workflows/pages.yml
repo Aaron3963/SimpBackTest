@@ -1,8 +1,11 @@
-name: Publish reports (Pages root = ./reports)
+name: Publish reports
 
 on:
   push:
     branches: ["main"]
+    paths:
+      - "reports/**"
+      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
@@ -66,8 +69,8 @@ jobs:
           </style>
           """)
           out.append("</head><body>")
-          out.append("<h1>HTML Reports</h1>")
-          out.append(f"<p class='meta'>Generated: {esc(now)} · Root: <code>./reports/</code></p>")
+          out.append("<h1>SimpBackTest Reports</h1>")
+          out.append(f"<p class='meta'>Last Generated: {esc(now)}")
           out.append("<input id='q' placeholder='Search tickers or report filenames...' />")
           out.append("<div class='grid' id='grid'>")
 
